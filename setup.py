@@ -7,9 +7,7 @@ import os
 from setuptools import setup, Extension
 
 from Cython.Build import cythonize
-
-LIBDATRIE_DIR = 'libdatrie'
-LIBDATRIE_FILES = sorted(glob.glob(os.path.join(LIBDATRIE_DIR, "datrie", "*.c")))
+from Cython.Build.Dependencies import default_create_extension
 
 DESCRIPTION = __doc__
 LONG_DESCRIPTION = open('README.rst').read() + open('CHANGES.rst').read()
@@ -30,21 +28,25 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: Implementation :: CPython',
     'Topic :: Software Development :: Libraries :: Python Modules',
     'Topic :: Scientific/Engineering :: Information Analysis',
     'Topic :: Text Processing :: Linguistic'
 ]
 
+def do_create_extension(template, kwds):
+    libs = kwds.get('libraries', []) + ["datrie"]
+    kwds['libraries'] = libs
+    return default_create_extension(template, kwds)
+
 ext_modules = cythonize(
     'src/datrie.pyx', 'src/cdatrie.pxd', 'src/stdio_ext.pxd',
     annotate=True,
     include_path=[os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")],
-    language_level=2
+    language_level=2,
+    create_extension=do_create_extension
     )
-
-for m in ext_modules:
-    m.include_dirs=[LIBDATRIE_DIR]
 
 setup(name="datrie",
       version="0.8.2",
@@ -55,10 +57,7 @@ setup(name="datrie",
       license=LICENSE,
       url='https://github.com/kmike/datrie',
       classifiers=CLASSIFIERS,
-      libraries=[('datrie', {
-          "sources": LIBDATRIE_FILES,
-          "include_dirs": [LIBDATRIE_DIR]})],
       ext_modules=ext_modules,
-      python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+      python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
       setup_requires=["pytest-runner", 'Cython>=0.28'],
       tests_require=["pytest", "hypothesis"])
