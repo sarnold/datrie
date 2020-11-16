@@ -35,10 +35,12 @@ CLASSIFIERS = [
     'Topic :: Text Processing :: Linguistic'
 ]
 
+
 def do_create_extension(template, kwds):
     libs = kwds.get('libraries', []) + ["datrie"]
     kwds['libraries'] = libs
     return default_create_extension(template, kwds)
+
 
 ext_modules = cythonize(
     'src/datrie.pyx', 'src/cdatrie.pxd', 'src/stdio_ext.pxd',
@@ -47,6 +49,7 @@ ext_modules = cythonize(
     language_level=2,
     create_extension=do_create_extension
     )
+
 
 setup(name="datrie",
       version="0.8.2",
