@@ -1,24 +1,15 @@
 #! /usr/bin/env python
-"""
-    Super-fast, efficiently stored Trie for Python.
-    Depends on (and tested with) libdatrie 0.2.12
-    https://github.com/tlwg/libdatrie/releases
-"""
+"""Super-fast, efficiently stored Trie for Python."""
 
 import glob
 import os
 
 from setuptools import setup, Extension
 
-__version__ = '0.8.1'
+from Cython.Build import cythonize
 
-# make setuptools happy with PEP 440-compliant post version
-# (enable this for patch releases)
-# REL_TAG = __version__.replace('-', 'p')
-
-DATRIE_DOWNLOAD_URL = (
-    'https://github.com/freepn/datrie/tarball/' + __version__
-)
+LIBDATRIE_DIR = 'libdatrie'
+LIBDATRIE_FILES = sorted(glob.glob(os.path.join(LIBDATRIE_DIR, "datrie", "*.c")))
 
 DESCRIPTION = __doc__
 LONG_DESCRIPTION = open('README.rst').read() + open('CHANGES.rst').read()
@@ -31,7 +22,10 @@ CLASSIFIERS = [
     'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
     'Programming Language :: Cython',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
@@ -42,24 +36,29 @@ CLASSIFIERS = [
     'Topic :: Text Processing :: Linguistic'
 ]
 
+ext_modules = cythonize(
+    'src/datrie.pyx', 'src/cdatrie.pxd', 'src/stdio_ext.pxd',
+    annotate=True,
+    include_path=[os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")],
+    language_level=2
+    )
+
+for m in ext_modules:
+    m.include_dirs=[LIBDATRIE_DIR]
 
 setup(name="datrie",
-      version=__version__,
+      version="0.8.2",
       description=DESCRIPTION,
       long_description=LONG_DESCRIPTION,
-      url='https://github.com/pytries/datrie',
       author='Mikhail Korobov',
       author_email='kmike84@gmail.com',
       license=LICENSE,
-      download_url=DATRIE_DOWNLOAD_URL,
+      url='https://github.com/kmike/datrie',
       classifiers=CLASSIFIERS,
-      ext_modules=[
-          Extension("datrie", [
-              'src/datrie.c',
-              'src/cdatrie.c',
-              'src/stdio_ext.c'
-          ], libraries=['datrie'],
-          include_dirs=['/usr/include/datrie'])
-      ],
-
+      libraries=[('datrie', {
+          "sources": LIBDATRIE_FILES,
+          "include_dirs": [LIBDATRIE_DIR]})],
+      ext_modules=ext_modules,
+      python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+      setup_requires=["pytest-runner", 'Cython>=0.28'],
       tests_require=["pytest", "hypothesis"])
