@@ -4,7 +4,7 @@ include COPYING
 include tox.ini
 include tox-bench.ini
 include update_c.sh
-include tests/words100k.txt.zip
+include bench/words100k.txt.zip
 recursive-include tests *.py
 
 include src/datrie.pyx
