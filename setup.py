@@ -52,7 +52,7 @@ ext_modules = cythonize(
 
 
 setup(name="datrie",
-      version="0.8.2",
+      version="0.8.2-1",
       description=DESCRIPTION,
       long_description=LONG_DESCRIPTION,
       author='Mikhail Korobov',
