@@ -62,5 +62,5 @@ setup(name="datrie",
       classifiers=CLASSIFIERS,
       ext_modules=ext_modules,
       python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
-      setup_requires=["pytest-runner", 'Cython>=0.28'],
-      tests_require=["pytest", "hypothesis"])
+      tests_require=["pytest", "hypothesis"],
+)
