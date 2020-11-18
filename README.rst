@@ -19,17 +19,6 @@ Installation
 
     pip install datrie
 
-NOTE: About bindings and versions
----------------------------------
-
-Since Python2 is now officially EOL, this branch (and any release made from it)
-has updated (static) bindings and cleaned up imports for Python3 (which also
-makes it incompatible with Python2).  The current (python) version support is:
-
-* releases up through 0.8 work with python 2 and up through python 3.7
-* this branch works with python 3 up through 3.8 (plus nightly)
-
-
 Usage
 =====
 
