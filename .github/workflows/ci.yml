@@ -54,11 +54,13 @@ jobs:
         vcpkg install libdatrie:x64-windows pybind11:x64-windows
         vcpkg integrate install
 
-    # This points the extension builder at the vcpkg toolchain file
+    # This makes msvc and vcpkg environment variables available in the following step(s)
     - name: Set Windows environment variables
       if: runner.os == 'Windows'
       run: |
-        echo "CMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
+        .github/workflows/vs_env.bat x64
+        source env.sh
+        echo "CMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake" >> $GITHUB_ENV
 
     - name: apt helper action
       if: runner.os == 'Linux'
