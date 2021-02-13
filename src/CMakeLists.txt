@@ -53,6 +53,12 @@ elseif(NOT MSVC)
     link_directories("/usr/lib64" "/usr/lib")
     target_link_libraries(${cython_module} PRIVATE "libdatrie.so")
   endif()
+else()
+  # no idea why find_package does NOT work here
+  set(DATRIE_INCLUDE_DIRS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/datrie)
+  set(DATRIE_LIBRARIES ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/datrie.lib)
+  include_directories(${DATRIE_INCLUDE_DIRS})
+  target_link_libraries(${cython_module} PRIVATE ${DATRIE_LIBRARIES})
 endif()
 
 if(APPLE)
