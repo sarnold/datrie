@@ -41,13 +41,18 @@ jobs:
       with:
         arch: x64
 
-    # this is supposed to cache automatically
-    - name: Install vcpkg plus packages
-      uses: lukka/run-vcpkg@v6.0
+    - name: Update vcpkg
       if: runner.os == 'Windows'
-      with:
-        vcpkgArguments: libdatrie:x64-windows pybind11:x64-windows
-        vcpkgGitCommitId: 066c6fd712a3b7015388de644e44faf9774f3641
+      run: |
+        cd C:\vcpkg
+        git pull
+        .\\bootstrap-vcpkg.bat
+
+    - name: Install deps with vcpkg
+      if: runner.os == 'Windows'
+      run: |
+        vcpkg install libdatrie:x64-windows pybind11:x64-windows
+        vcpkg integrate install
 
     # This points the extension builder at the vcpkg toolchain file
     - name: Set Windows environment variables
@@ -55,11 +60,13 @@ jobs:
       run: |
         echo "CMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
 
-    - name: Install deps with apt-get
+    - name: apt helper action
       if: runner.os == 'Linux'
-      run: |
-        sudo apt-get -qq update
-        sudo apt-get install -y libdatrie-dev pybind11-dev ninja-build
+      uses: ryankurte/action-apt@v0.2.0
+      with:
+        # architectures to pass to dpkg --add-architecture
+        #architectures: # optional
+        packages: libdatrie-dev pybind11-dev ninja-build
 
     - name: Test with tox
       run: |
