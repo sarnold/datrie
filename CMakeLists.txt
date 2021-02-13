@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.18)
 
-project(datrie LANGUAGES C)
+project(datrie LANGUAGES C CXX)
 
 option(PY_DEBUG "Set if python being linked is a Py_DEBUG build" OFF)
 
