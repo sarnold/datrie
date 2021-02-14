@@ -54,11 +54,11 @@ elseif(NOT MSVC)
     target_link_libraries(${cython_module} PRIVATE "libdatrie.so")
   endif()
 else()
-  # no idea why find_package does NOT work here
-  set(DATRIE_INCLUDE_DIRS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/datrie)
-  set(DATRIE_LIBRARIES ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/datrie.lib)
-  include_directories(${DATRIE_INCLUDE_DIRS})
-  target_link_libraries(${cython_module} PRIVATE ${DATRIE_LIBRARIES})
+  # even though we used vcpkg, we get to do the manual dance with windows
+  find_path(DATRIE_INCLUDE_DIR datrie/triedefs.h)
+  find_library(DATRIE_LIB datrie)
+  include_directories(${DATRIE_INCLUDE_DIR})
+  target_link_libraries(${cython_module} PRIVATE ${DATRIE_LIB})
 endif()
 
 if(APPLE)

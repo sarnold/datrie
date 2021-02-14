@@ -51,7 +51,7 @@ jobs:
     - name: Install deps with vcpkg
       if: runner.os == 'Windows'
       run: |
-        vcpkg install libdatrie:x64-windows pybind11:x64-windows
+        vcpkg install libdatrie:x64-windows
         vcpkg integrate install
 
     # This makes msvc and vcpkg environment variables available in the following step(s)
