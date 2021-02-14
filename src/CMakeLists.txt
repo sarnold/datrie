@@ -34,11 +34,12 @@ target_compile_definitions(${cython_module} PRIVATE VERSION_INFO=${SCM_VERSION_I
 
 # here we get to jump through some hoops to find libdatrie on the manylinux
 # docker CI images, etc
-find_package(datrie CONFIG NAMES datrie)
+find_package(Datrie REQUIRED)
 
-if(datrie_FOUND)
+if(Datrie_FOUND)
   message(STATUS "System datrie found")
-  target_link_libraries(${cython_module} PRIVATE datrie)
+  target_include_directories(${cython_module} PUBLIC ${DATRIE_INCLUDE_DIR})
+  target_link_libraries(${cython_module} PRIVATE ${DATRIE_LIBRARY})
 elseif(NOT MSVC)
   message(STATUS "Trying PkgConfig")
   find_package(PkgConfig REQUIRED)
@@ -53,12 +54,6 @@ elseif(NOT MSVC)
     link_directories("/usr/lib64" "/usr/lib")
     target_link_libraries(${cython_module} PRIVATE "libdatrie.so")
   endif()
-else()
-  # even though we used vcpkg, we get to do the manual dance with windows
-  find_path(DATRIE_INCLUDE_DIRS datrie/triedefs.h)
-  find_library(DATRIE_LIBS NAMES datrie libdatrie)
-  target_include_directories(${cython_module} PUBLIC ${DATRIE_INCLUDE_DIRS})
-  target_link_libraries(${cython_module} PRIVATE ${DATRIE_LIBS})
 endif()
 
 if(APPLE)

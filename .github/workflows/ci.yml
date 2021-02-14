@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-20.04, windows-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
@@ -35,6 +35,27 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
+
+    - name: Prepare compiler environment for Windows
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    # this is supposed to cache automatically
+    - name: Install vcpkg plus packages
+      uses: lukka/run-vcpkg@v6.0
+      if: runner.os == 'Windows'
+      with:
+        vcpkgTriplet: x64-windows
+        vcpkgArguments: libdatrie
+        vcpkgGitCommitId: 066c6fd712a3b7015388de644e44faf9774f3641
+
+    # This points the extension builder at the vcpkg toolchain file
+    - name: Set Windows environment variables
+      if: runner.os == 'Windows'
+      run: |
+        echo "CMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
 
     - name: apt helper action
       if: runner.os == 'Linux'
