@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -16,59 +15,26 @@ jobs:
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
+      PIP_DOWNLOAD_CACHE: ${{ github.workspace }}/../.pip_download_cache
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        os: [ubuntu-20.04, windows-latest]
+        os: [ubuntu-20.04]
         python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Add python requirements
+    - name: Add requirements
       run: |
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
-
-    - name: Prepare compiler environment for Windows
-      if: runner.os == 'Windows'
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x64
-
-    - name: Cache vcpkg packages
-      if: runner.os != 'Linux'
-      uses: actions/cache@v2
-      id: cache
-      with:
-          path: c:\vcpkg\installed
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/ci.yml') }}
-
-    - name: Update vcpkg
-      if: runner.os == 'Windows'
-      run: |
-        cd C:\vcpkg
-        git pull
-        .\\bootstrap-vcpkg.bat -disableMetrics
-
-    - name: Install deps with vcpkg
-      if: runner.os != 'Linux' && steps.cache.outputs.cache-hit != 'true'
-      run: |
-        vcpkg install libdatrie:x64-windows
-        vcpkg integrate install
-
-    # This makes msvc and vcpkg environment variables available in the following step(s)
-    - name: Set Windows environment variables
-      if: runner.os == 'Windows'
-      run: |
-        .github/workflows/vs_env.bat x64
-        source env.sh
-        echo "CMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake" >> $GITHUB_ENV
 
     - name: apt helper action
       if: runner.os == 'Linux'
@@ -78,10 +44,14 @@ jobs:
         #architectures: # optional
         packages: libdatrie-dev pybind11-dev ninja-build
 
-    - name: Test with tox
+    - name: Test in place
       run: |
-        tox -e dev
+        tox -e py
 
     - name: Build dist pkgs
       run: |
         tox -e deploy
+
+    - name: Check wheel
+      run: |
+        tox -e check
