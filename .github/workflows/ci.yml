@@ -41,6 +41,14 @@ jobs:
       with:
         arch: x64
 
+    - name: Cache vcpkg packages
+      if: runner.os != 'Linux'
+      uses: actions/cache@v2
+      id: cache
+      with:
+          path: c:\vcpkg\installed
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('.github/workflows/ci.yml') }}
+
     - name: Update vcpkg
       if: runner.os == 'Windows'
       run: |
@@ -49,7 +57,7 @@ jobs:
         .\\bootstrap-vcpkg.bat
 
     - name: Install deps with vcpkg
-      if: runner.os == 'Windows'
+      if: runner.os != 'Linux' && steps.cache.outputs.cache-hit != 'true'
       run: |
         vcpkg install libdatrie:x64-windows
         vcpkg integrate install
