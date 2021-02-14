@@ -32,27 +32,17 @@ target_include_directories(${cython_module} PUBLIC
 
 target_compile_definitions(${cython_module} PRIVATE VERSION_INFO=${SCM_VERSION_INFO})
 
-# here we get to jump through some hoops to find libdatrie on the manylinux
-# docker CI images, etc
-find_package(Datrie REQUIRED)
-
-if(Datrie_FOUND)
-  message(STATUS "System datrie found")
-  target_include_directories(${cython_module} PUBLIC ${DATRIE_INCLUDE_DIR})
-  target_link_libraries(${cython_module} PRIVATE ${DATRIE_LIBRARY})
-elseif(NOT MSVC)
-  message(STATUS "Trying PkgConfig")
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(DATRIE datrie-0.2 REQUIRED IMPORTED_TARGET)
-
-  if(DATRIE_FOUND)
-    include_directories(${DATRIE_INCLUDE_DIRS})
-    target_link_libraries(${cython_module} PRIVATE PkgConfig::DATRIE)
+if(FOUND_WITH_PKGCONFIG)
+  include_directories(${DATRIE_INCLUDE_DIRS})
+  target_link_libraries(${cython_module} PRIVATE PkgConfig::DATRIE)
+else()
+  find_package(Datrie REQUIRED)
+  if(Datrie_FOUND)
+    message(STATUS "Local datrie found")
+    target_include_directories(${cython_module} PUBLIC ${DATRIE_INCLUDE_DIR})
+    target_link_libraries(${cython_module} PRIVATE ${DATRIE_LIBRARY})
   else()
-    # last resort for manylinux: just try it
-    message(STATUS "Blindly groping instead")
-    link_directories("/usr/lib64" "/usr/lib")
-    target_link_libraries(${cython_module} PRIVATE "libdatrie.so")
+    message(ERROR "No libdatrie found")
   endif()
 endif()
 

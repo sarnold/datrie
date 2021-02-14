@@ -10,6 +10,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 include(GNUInstallDirs)
+include(CheckIncludeFile)
+include(CheckIncludeFileCXX)
+include(CheckIncludeFiles)
 
 find_package(pybind11 CONFIG)
 
@@ -30,8 +33,20 @@ endif()
 
 find_package(Threads REQUIRED)
 
-if (${PYTHON_IS_DEBUG})
+if(${PYTHON_IS_DEBUG})
   set(PY_DEBUG ON)
+endif()
+
+message(STATUS "Looking for libdatrie via PkgConfig")
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(DATRIE datrie-0.2 REQUIRED IMPORTED_TARGET)
+
+if(DATRIE_FOUND)
+  message(STATUS "System datrie found via PkgConfig")
+  set(FOUND_WITH_PKGCONFIG ON)
+else()
+  message(STATUS "System datrie not found, building locally instead")
+  set(FOUND_WITH_PKGCONFIG OFF)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
