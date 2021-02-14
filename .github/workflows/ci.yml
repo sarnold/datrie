@@ -54,7 +54,7 @@ jobs:
       run: |
         cd C:\vcpkg
         git pull
-        .\\bootstrap-vcpkg.bat
+        .\\bootstrap-vcpkg.bat -disableMetrics
 
     - name: Install deps with vcpkg
       if: runner.os != 'Linux' && steps.cache.outputs.cache-hit != 'true'
@@ -80,7 +80,7 @@ jobs:
 
     - name: Test with tox
       run: |
-        tox -e py
+        tox -e dev
 
     - name: Build dist pkgs
       run: |

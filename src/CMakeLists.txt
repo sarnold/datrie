@@ -54,7 +54,6 @@ elseif(NOT MSVC)
     target_link_libraries(${cython_module} PRIVATE "libdatrie.so")
   endif()
 else()
-  find_package(datrie)
   # even though we used vcpkg, we get to do the manual dance with windows
   find_path(DATRIE_INCLUDE_DIR datrie/triedefs.h)
   find_library(DATRIE_LIB NAMES datrie libdatrie)
