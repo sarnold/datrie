@@ -66,6 +66,7 @@ jobs:
         packages: libdatrie-dev pybind11-dev ninja-build
 
     - name: Test in place
+      if: runner.os == 'Linux'
       run: |
         tox -e py
 

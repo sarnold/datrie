@@ -1,18 +1,30 @@
 cmake_minimum_required(VERSION 3.15...3.18)
 
-project(datrie LANGUAGES C CXX)
-
 option(PY_DEBUG "Set if python being linked is a Py_DEBUG build" OFF)
+option(libdatrie_external "build Datrie library")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
             "Default build type: RelWithDebInfo" FORCE)
 endif()
 
+project(datrie LANGUAGES C CXX)
+
 include(GNUInstallDirs)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 include(CheckIncludeFiles)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
+
+if(NOT libdatrie_external)
+  find_package(Datrie)
+endif()
+
+if(NOT Datrie_FOUND)
+  find_package(PkgConfig)
+  pkg_check_modules(DATRIE datrie-0.2 IMPORTED_TARGET)
+endif()
 
 find_package(pybind11 CONFIG)
 
@@ -37,21 +49,5 @@ if(${PYTHON_IS_DEBUG})
   set(PY_DEBUG ON)
 endif()
 
-message(STATUS "Looking for libdatrie via PkgConfig")
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(DATRIE datrie-0.2 REQUIRED IMPORTED_TARGET)
-
-if(DATRIE_FOUND)
-  message(STATUS "System datrie found via PkgConfig")
-  set(FOUND_WITH_PKGCONFIG ON)
-else()
-  message(STATUS "System datrie not found, building locally instead")
-  set(FOUND_WITH_PKGCONFIG OFF)
-endif()
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${PROJECT_SOURCE_DIR}/cmake/)
-
 include_directories(${PROJECT_SOURCE_DIR}/src)
-
 add_subdirectory(src)

@@ -1,8 +1,7 @@
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(cython_module datrie)
 
 find_package(Cython REQUIRED)
-
-set(cython_module datrie)
 
 set(datrie_include_dir "${PROJECT_SOURCE_DIR}/src")
 set(cython_output "${CMAKE_CURRENT_SOURCE_DIR}/${cython_module}.c")
@@ -10,7 +9,7 @@ set(cython_src ${cython_module}.pyx)
 # Track cython sources
 file(GLOB cy_srcs *.pyx *.pxd)
 
-# .pyx -> .cpp
+# .pyx -> .c
 add_custom_command(OUTPUT ${cython_output}
                    COMMAND ${CYTHON_EXECUTABLE}
                            -a -2
@@ -32,18 +31,12 @@ target_include_directories(${cython_module} PUBLIC
 
 target_compile_definitions(${cython_module} PRIVATE VERSION_INFO=${SCM_VERSION_INFO})
 
-if(FOUND_WITH_PKGCONFIG)
+if(Datrie_FOUND)
+  include_directories(${DATRIE_INCLUDE_DIRS})
+  target_link_libraries(${cython_module} PRIVATE Datrie::Datrie)
+else()
   include_directories(${DATRIE_INCLUDE_DIRS})
   target_link_libraries(${cython_module} PRIVATE PkgConfig::DATRIE)
-else()
-  find_package(Datrie REQUIRED)
-  if(Datrie_FOUND)
-    message(STATUS "Local datrie found")
-    target_include_directories(${cython_module} PUBLIC ${DATRIE_INCLUDE_DIR})
-    target_link_libraries(${cython_module} PRIVATE ${DATRIE_LIBRARY})
-  else()
-    message(ERROR "No libdatrie found")
-  endif()
 endif()
 
 if(APPLE)
