@@ -20,8 +20,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-20.04, macos-latest]
+        os: [ubuntu-20.04, macos-latest, windows-2019]
         python-version: [3.6, 3.7, 3.8, 3.9]
+        include:
+          - os: windows-2019
+            triplet: x64-windows
+          - os: ubuntu-20.04
+            triplet: x64-linux
+          - os: macos-latest
+            triplet: x64-osx
 
     steps:
     - name: Set git crlf/eol
@@ -42,6 +49,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
 
+    - name: Install macos deps with brew
+      if: runner.os == 'macOS'
+      run: |
+        brew install ninja
+
     - name: Prepare compiler environment for Windows
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
@@ -51,15 +63,15 @@ jobs:
     # this is supposed to cache automatically
     - name: Install vcpkg plus packages
       uses: lukka/run-vcpkg@v6.0
-      if: runner.os == 'Windows'
+      if: runner.os != 'Linux'
       with:
-        vcpkgTriplet: x64-windows
+        vcpkgTriplet: ${{ matrix.triplet }}
         vcpkgArguments: libdatrie
         vcpkgGitCommitId: 066c6fd712a3b7015388de644e44faf9774f3641
 
     # This points the extension builder at the vcpkg toolchain file
     - name: Set Windows environment variables
-      if: runner.os == 'Windows'
+      if: runner.os != 'Linux'
       run: |
         echo "CMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
 
