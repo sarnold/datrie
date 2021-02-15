@@ -6,11 +6,31 @@
 
 find_path(Datrie_INCLUDE_DIR
   NAMES datrie/triedefs.h
-  PATH_SUFFIXES include include/datrie)
+  HINTS
+    ENV VCPKG_ROOT
+  PATH_SUFFIXES include include/datrie
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /opt/local
+  /opt
+  /usr
+  /usr/local/
+)
 
 find_library(Datrie_LIBRARY
   NAMES datrie libdatrie
-  PATH_SUFFIXES lib lib64 lib32)
+  HINTS
+    ENV VCPKG_ROOT
+  PATH_SUFFIXES lib lib64 lib32
+  PATHS
+  ~/Library/Frameworks
+  /Library/Frameworks
+  /opt/local
+  /opt
+  /usr
+  /usr/local/
+)
 
 mark_as_advanced(Datrie_INCLUDE_DIR Datrie_LIBRARY)
 

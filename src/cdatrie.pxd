@@ -30,6 +30,8 @@ cdef extern from "datrie/trie.h":
     ctypedef struct TrieIterator:
         pass
 
+    ctypedef int TrieData
+
     ctypedef bint (*TrieEnumFunc) (AlphaChar *key,
                                    TrieData key_data,
                                    void *user_data)

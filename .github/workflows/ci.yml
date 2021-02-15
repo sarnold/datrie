@@ -18,12 +18,12 @@ jobs:
       PYTHONIOENCODING: utf-8
       PIP_DOWNLOAD_CACHE: ${{ github.workspace }}/../.pip_download_cache
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-latest, windows-2019]
+        os: [ubuntu-20.04, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
         include:
-          - os: windows-2019
+          - os: windows-latest
             triplet: x64-windows
           - os: ubuntu-20.04
             triplet: x64-linux
@@ -62,16 +62,17 @@ jobs:
 
     # this is supposed to cache automatically
     - name: Install vcpkg plus packages
-      uses: lukka/run-vcpkg@v6.0
+      uses: lukka/run-vcpkg@v6.1
       if: runner.os != 'Linux'
       with:
         vcpkgTriplet: ${{ matrix.triplet }}
+        vcpkgDirectory: ${{ runner.workspace }}/vcpkg/
         vcpkgArguments: libdatrie
-        vcpkgGitCommitId: 066c6fd712a3b7015388de644e44faf9774f3641
+        vcpkgGitCommitId: b60f003ccf5fe8613d029f49f835c8929a66eb61
 
     # This points the extension builder at the vcpkg toolchain file
     - name: Set Windows environment variables
-      if: runner.os != 'Linux'
+      if: runner.os == 'Windows'
       run: |
         echo "CMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
 
