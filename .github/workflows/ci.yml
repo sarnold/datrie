@@ -22,13 +22,6 @@ jobs:
       matrix:
         os: [ubuntu-20.04, macos-latest, windows-latest]
         python-version: [3.6, 3.7, 3.8, 3.9]
-        include:
-          - os: windows-latest
-            triplet: x64-windows
-          - os: ubuntu-20.04
-            triplet: x64-linux
-          - os: macos-latest
-            triplet: x64-osx
 
     steps:
     - name: Set git crlf/eol
@@ -49,10 +42,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
 
+    - name: Prepare vcpkg environment for macos
+      if: runner.os == 'macOS'
+      run: |
+        export VCPKG_ROOT=/usr/local/share/vcpkg
+        echo "VCPKG_ROOT=$VCPKG_ROOT" >> $GITHUB_ENV
+
     - name: Install macos deps with brew
       if: runner.os == 'macOS'
       run: |
         brew install ninja
+        vcpkg update
+        vcpkg install libdatrie:x64-osx
 
     - name: Prepare compiler environment for Windows
       if: runner.os == 'Windows'
@@ -71,8 +72,8 @@ jobs:
         vcpkgGitCommitId: b60f003ccf5fe8613d029f49f835c8929a66eb61
 
     # This points the extension builder at the vcpkg toolchain file
-    - name: Set Windows environment variables
-      if: runner.os == 'Windows'
+    - name: Set vcpkg.cmake path on ${{ matrix.os }}
+      if: runner.os != 'Linux'
       run: |
         echo "CMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
 
