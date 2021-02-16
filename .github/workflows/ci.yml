@@ -37,47 +37,28 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Add requirements
+    - name: Add pip requirements
       run: |
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions
-
-    - name: Prepare vcpkg environment for macos
-      if: runner.os == 'macOS'
-      run: |
-        export VCPKG_ROOT=/usr/local/share/vcpkg
-        echo "VCPKG_ROOT=$VCPKG_ROOT" >> $GITHUB_ENV
 
     - name: Install macos deps with brew
       if: runner.os == 'macOS'
       run: |
         brew install ninja
-        vcpkg update
-        vcpkg install libdatrie:x64-osx
 
-    - name: Prepare compiler environment for Windows
+    - name: Prepare compiler environment for ${{ matrix.os }}
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
 
-    # this is supposed to cache automatically
-    - name: Install vcpkg plus packages
-      uses: lukka/run-vcpkg@v6.1
-      if: runner.os != 'Linux'
-      with:
-        vcpkgTriplet: ${{ matrix.triplet }}
-        vcpkgDirectory: ${{ runner.workspace }}/vcpkg/
-        vcpkgArguments: libdatrie
-        vcpkgGitCommitId: b60f003ccf5fe8613d029f49f835c8929a66eb61
-
-    # This points the extension builder at the vcpkg toolchain file
-    - name: Set vcpkg.cmake path on ${{ matrix.os }}
-      if: runner.os != 'Linux'
+    - name: Set have package true for ${{ matrix.os }}
+      if: runner.os == 'Linux'
       run: |
-        echo "CMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" >> $GITHUB_ENV
+        echo "HAVE_LIBDATRIE_PKG=TRUE" >> $GITHUB_ENV
 
-    - name: apt helper action
+    - name: Install deps with apt helper action
       if: runner.os == 'Linux'
       uses: ryankurte/action-apt@v0.2.0
       with:
@@ -86,6 +67,7 @@ jobs:
         packages: libdatrie-dev pybind11-dev ninja-build
 
     - name: Test in place
+      # windows does not like build_ext -i or removing previous build
       if: runner.os != 'Windows'
       run: |
         tox -e py
