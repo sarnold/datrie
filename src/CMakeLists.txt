@@ -20,6 +20,16 @@ add_custom_command(OUTPUT ${cython_output}
                    DEPENDS ${cy_srcs}
                    COMMENT "Cythonizing extension ${cython_src}")
 
+if(NOT USE_LIBDATRIE_PKG)
+  # use the locally cloned source from FetchContent
+  set(DATRIE_INCLUDE_DIR "${libdatrie_SOURCE_DIR}")
+  file(GLOB_RECURSE DATRIE_SOURCES
+       LIST_DIRECTORIES true
+       "${libdatrie_SOURCE_DIR}/datrie/*.c")
+  list(APPEND cython_output ${DATRIE_SOURCES})
+  include_directories(${DATRIE_INCLUDE_DIR})
+endif()
+
 add_library(${cython_module} MODULE ${cython_output})
 
 set_target_properties(${cython_module}
@@ -34,7 +44,7 @@ target_compile_definitions(${cython_module} PRIVATE VERSION_INFO=${SCM_VERSION_I
 if(Datrie_FOUND)
   include_directories(${DATRIE_INCLUDE_DIRS})
   target_link_libraries(${cython_module} PRIVATE Datrie::Datrie)
-else()
+elseif(DATRIE_FOUND)
   include_directories(${DATRIE_INCLUDE_DIRS})
   target_link_libraries(${cython_module} PRIVATE PkgConfig::DATRIE)
 endif()

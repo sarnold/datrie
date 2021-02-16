@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.15...3.18)
 
 option(PY_DEBUG "Set if python being linked is a Py_DEBUG build" OFF)
-option(libdatrie_external "build Datrie library")
+option(USE_LIBDATRIE_PKG "Use OS-provided libdatrie package")
+if(DEFINED ENV{HAVE_LIBDATRIE_PKG})
+  set(USE_LIBDATRIE_PKG "$ENV{HAVE_LIBDATRIE_PKG}")
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
@@ -17,13 +20,27 @@ include(CheckIncludeFiles)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
-if(NOT libdatrie_external)
+if(USE_LIBDATRIE_PKG)
   find_package(Datrie)
 endif()
 
-if(NOT Datrie_FOUND)
+if(USE_LIBDATRIE_PKG AND NOT Datrie_FOUND)
   find_package(PkgConfig)
   pkg_check_modules(DATRIE datrie-0.2 IMPORTED_TARGET)
+endif()
+
+if(NOT USE_LIBDATRIE_PKG)
+  message(STATUS "Fetching libdatrie from github")
+  # Fetch libdatrie
+  include(FetchContent)
+
+  FetchContent_Declare(
+          libdatrie
+          GIT_REPOSITORY https://github.com/tlwg/libdatrie
+          GIT_TAG v0.2.13
+  )
+  FetchContent_MakeAvailable(libdatrie)
+  # this gets us the package source directory
 endif()
 
 find_package(pybind11 CONFIG)
