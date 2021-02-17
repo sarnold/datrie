@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15...3.18)
 
 option(PY_DEBUG "Set if python being linked is a Py_DEBUG build" OFF)
+option(GIT_SUBMODULE "Check submodules during build" ON)
 option(USE_LIBDATRIE_PKG "Use OS-provided libdatrie package")
 if(DEFINED ENV{HAVE_LIBDATRIE_PKG})
   set(USE_LIBDATRIE_PKG "$ENV{HAVE_LIBDATRIE_PKG}")
@@ -31,6 +32,25 @@ endif()
 
 if(NOT USE_LIBDATRIE_PKG)
   message(STATUS "Trying libdatrie submodule")
+  find_package(Git QUIET)
+  if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+    # Update submodules as needed
+    if(GIT_SUBMODULE)
+      if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libdatrie/datrie-0.2.pc.in")
+        message(STATUS "Submodule update")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+          message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        endif()
+      endif()
+    endif()
+  endif()
+
+  if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libdatrie/datrie-0.2.pc.in")
+    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+  endif()
 endif()
 
 find_package(pybind11 CONFIG)
