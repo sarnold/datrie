@@ -68,9 +68,6 @@ jobs:
         packages: libdatrie-dev pybind11-dev ninja-build
 
     - name: Test in place
-      # windows does not like build_ext -i or removing previous build
-      # (via Path inside tox env)
-      #if: runner.os != 'Windows'
       run: |
         tox -e py
 

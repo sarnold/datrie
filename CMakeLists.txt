@@ -30,7 +30,7 @@ if(USE_LIBDATRIE_PKG AND NOT Datrie_FOUND)
 endif()
 
 if(NOT USE_LIBDATRIE_PKG)
-  message(STATUS "Using libdatrie submodule")
+  message(STATUS "Trying libdatrie submodule")
 endif()
 
 find_package(pybind11 CONFIG)
