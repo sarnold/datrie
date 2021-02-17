@@ -30,17 +30,7 @@ if(USE_LIBDATRIE_PKG AND NOT Datrie_FOUND)
 endif()
 
 if(NOT USE_LIBDATRIE_PKG)
-  message(STATUS "Fetching libdatrie from github")
-  # Fetch libdatrie
-  include(FetchContent)
-
-  FetchContent_Declare(
-          libdatrie
-          GIT_REPOSITORY https://github.com/tlwg/libdatrie
-          GIT_TAG v0.2.13
-  )
-  FetchContent_MakeAvailable(libdatrie)
-  # this gets us the package source directory
+  message(STATUS "Using libdatrie submodule")
 endif()
 
 find_package(pybind11 CONFIG)
