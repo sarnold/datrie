@@ -1,0 +1,3 @@
+[submodule "libdatrie"]
+	path = libdatrie
+	url = ../../tlwg/libdatrie.git
